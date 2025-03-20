@@ -41,6 +41,9 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kRearRightTurningCanId,
       DriveConstants.kBackRightChassisAngularOffset);
 
+      private MAXSwerveModule[] modules =
+      new MAXSwerveModule[] {m_frontLeft, m_frontRight, m_rearLeft, m_rearRight};
+
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
@@ -182,4 +185,31 @@ public class DriveSubsystem extends SubsystemBase {
   public double getTurnRate() {
     return m_gyro.getRate(IMUAxis.kZ) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
+
+  public SwerveModuleState[] getModuleStates() {
+    SwerveModuleState[] states = new SwerveModuleState[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      states[i] = modules[i].getState();
+    }
+    return states;
+  }
+  
+  public ChassisSpeeds getChassisSpeeds() {
+    return DriveConstants.kDriveKinematics.toChassisSpeeds(getModuleStates());
+  }
+
+  public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+
+    // ChassisSpeeds adjustedSpeeds = new ChassisSpeeds(
+    //   robotRelativeSpeeds.vxMetersPerSecond,
+    //   robotRelativeSpeeds.vyMetersPerSecond,
+    //   robotRelativeSpeeds.omegaRadiansPerSecond //Unstable.
+    // );
+    ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+
+    SwerveModuleState[] targetStates =
+    DriveConstants.kDriveKinematics.toSwerveModuleStates(targetSpeeds);
+    setModuleStates(targetStates);
+  }
+
 }
