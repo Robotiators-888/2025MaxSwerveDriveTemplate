@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.studica.frc.AHRS;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -43,16 +44,18 @@ public class DriveSubsystem extends SubsystemBase {
 
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
+ // private static AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
       Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
       new SwerveModulePosition[] {
-          m_frontLeft.getPosition(),
+          //m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()
+          
       });
 
   /** Creates a new DriveSubsystem. */
@@ -67,7 +70,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_odometry.update(
         Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
         new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
+           // m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
@@ -92,7 +95,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_odometry.resetPosition(
         Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
         new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
+           // m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
@@ -122,17 +125,37 @@ public class DriveSubsystem extends SubsystemBase {
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
+    //m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
+  }
+
+
+  public void driveFieldRelative(ChassisSpeeds fieldRelativeSpeeds) {
+    driveRobotRelative(
+        ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, getPose().getRotation()));
+  }
+
+  public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+
+    // ChassisSpeeds adjustedSpeeds = new ChassisSpeeds(
+    //   robotRelativeSpeeds.vxMetersPerSecond,
+    //   robotRelativeSpeeds.vyMetersPerSecond,
+    //   robotRelativeSpeeds.omegaRadiansPerSecond //Unstable.
+    // );
+    ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+
+    SwerveModuleState[] targetStates =
+    DriveConstants.kDriveKinematics.toSwerveModuleStates(targetSpeeds);
+    setModuleStates(targetStates);
   }
 
   /**
    * Sets the wheels into an X formation to prevent movement.
    */
   public void setX() {
-    m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+    //m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
     m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     m_rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
@@ -146,7 +169,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, DriveConstants.kMaxSpeedMetersPerSecond);
-    m_frontLeft.setDesiredState(desiredStates[0]);
+   // m_frontLeft.setDesiredState(desiredStates[0]);
     m_frontRight.setDesiredState(desiredStates[1]);
     m_rearLeft.setDesiredState(desiredStates[2]);
     m_rearRight.setDesiredState(desiredStates[3]);
@@ -154,7 +177,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Resets the drive encoders to currently read a position of 0. */
   public void resetEncoders() {
-    m_frontLeft.resetEncoders();
+    //m_frontLeft.resetEncoders();
     m_rearLeft.resetEncoders();
     m_frontRight.resetEncoders();
     m_rearRight.resetEncoders();
@@ -182,4 +205,5 @@ public class DriveSubsystem extends SubsystemBase {
   public double getTurnRate() {
     return m_gyro.getRate(IMUAxis.kZ) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
+
 }
