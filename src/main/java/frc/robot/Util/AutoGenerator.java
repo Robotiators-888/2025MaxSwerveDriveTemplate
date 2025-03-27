@@ -25,6 +25,7 @@ import frc.robot.subsystems.DriveSubsystem;
     } catch (Exception e) {
       // Handle exception as needed
       e.printStackTrace();
+      return;
     }
 
     // Configure AutoBuilder last
@@ -51,6 +52,12 @@ import frc.robot.subsystems.DriveSubsystem;
             },
             Drivetrain // Reference to this subsystem to set requirements
     );
+  }
+  public static AutoGenerator getInstance() {
+    if (INSTANCE == null) {
+        INSTANCE = new AutoGenerator();
+    }
+    return INSTANCE;
   }
 }
 

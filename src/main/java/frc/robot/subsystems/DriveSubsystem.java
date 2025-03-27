@@ -20,6 +20,7 @@ import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
+  private static DriveSubsystem INSTANCE = null;
   // Create MAXSwerveModules
   private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
       DriveConstants.kFrontLeftDrivingCanId,
@@ -210,6 +211,13 @@ public class DriveSubsystem extends SubsystemBase {
     SwerveModuleState[] targetStates =
     DriveConstants.kDriveKinematics.toSwerveModuleStates(targetSpeeds);
     setModuleStates(targetStates);
+  }
+
+  public static DriveSubsystem getInstance() {
+    if (INSTANCE == null) {
+        INSTANCE = new DriveSubsystem();
+    }
+    return INSTANCE;
   }
 
 }
