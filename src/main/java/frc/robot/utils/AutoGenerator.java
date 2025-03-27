@@ -1,4 +1,4 @@
-package frc.robot.Util;
+package frc.robot.utils;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
