@@ -25,7 +25,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
  */
 public class RobotContainer {
     // The robot's subsystems
-    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+    public static DriveSubsystem m_robotDrive = DriveSubsystem.getInstance();
     private static final AutoGenerator autoGenerator = AutoGenerator.getInstance();
     private final SendableChooser<Command> autoChooser;
 
